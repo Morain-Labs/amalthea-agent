@@ -1,15 +1,22 @@
 import { createTools } from '@amalthea/assistant-core';
+import type { NextRequest } from 'next/server';
 import { createFirestorePort } from '@/lib/firestore-port';
+import { checkRateLimit, clientKey, tooMany } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+
+// Reads are cheap, the bucket is loose: enough for the panel's refreshes.
+const STATE_RULE = { perMinute: 40, burst: 20 };
 
 /**
  * The kitchen panel's data: pantry, current plan, grocery list, household.
  * Pantry and list come from the same tool handlers the model presses, so
  * the panel always shows exactly what the assistant sees.
  */
-export async function GET(): Promise<Response> {
+export async function GET(request: NextRequest): Promise<Response> {
+  const limit = checkRateLimit(`state:${clientKey(request)}`, STATE_RULE);
+  if (!limit.allowed) return tooMany(limit.retryAfterSeconds);
   const port = createFirestorePort();
   const tools = createTools(port);
   const call = async (name: string): Promise<unknown> => {

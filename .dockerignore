@@ -1,0 +1,12 @@
+.git
+.github
+node_modules
+**/node_modules
+.next
+**/.next
+.env*
+.remember
+firestore-debug.log
+firebase-debug.log
+Dockerfile
+README.md

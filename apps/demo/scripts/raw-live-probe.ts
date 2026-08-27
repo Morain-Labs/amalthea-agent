@@ -11,12 +11,21 @@ loadRootEnv();
 const model = liveModelId();
 console.log(`raw live probe, model: ${model}`);
 
+const useVertex =
+  process.env.GOOGLE_GENAI_USE_VERTEXAI === 'true' ||
+  process.env.GOOGLE_GENAI_USE_ENTERPRISE === 'true';
 const apiVersion = process.env.GEMINI_LIVE_API_VERSION ?? 'v1alpha';
-console.log(`apiVersion: ${apiVersion}`);
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-  httpOptions: { apiVersion },
-});
+console.log(useVertex ? 'backend: vertex' : `backend: api key, apiVersion ${apiVersion}`);
+const ai = useVertex
+  ? new GoogleGenAI({
+      vertexai: true,
+      project: process.env.GOOGLE_CLOUD_PROJECT,
+      location: process.env.GOOGLE_CLOUD_LOCATION ?? 'us-central1',
+    })
+  : new GoogleGenAI({
+      apiKey: process.env.GEMINI_API_KEY,
+      httpOptions: { apiVersion },
+    });
 
 const watchdog = setTimeout(() => {
   console.error('RAW LIVE: TIMEOUT after 45s');

@@ -1,3 +1,4 @@
+import { join } from 'node:path';
 import type { NextConfig } from 'next';
 import { loadRootEnv } from './src/lib/env';
 
@@ -16,6 +17,10 @@ const nextConfig: NextConfig = {
   // Server-only SDKs stay unbundled: ADK's OpenTelemetry internals and
   // firebase-admin break under bundling, and they only ever run in Node.
   serverExternalPackages: ['@google/adk', '@google/genai', 'firebase-admin'],
+  // Cloud Run runs the traced standalone server. The tracing root is the
+  // workspace root so @amalthea/assistant-core rides along.
+  output: 'standalone',
+  outputFileTracingRoot: join(import.meta.dirname, '../../'),
 };
 
 export default nextConfig;

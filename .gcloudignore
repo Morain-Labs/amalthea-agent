@@ -1,0 +1,12 @@
+# Controls what `gcloud run deploy --source .` uploads to Cloud Build.
+# Secrets never leave the machine, dev state stays local.
+.git/
+.env*
+.remember/
+node_modules/
+**/node_modules/
+.next/
+**/.next/
+firestore-debug.log
+firebase-debug.log
+coverage/

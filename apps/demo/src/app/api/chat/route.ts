@@ -1,15 +1,22 @@
 import { NextRequest } from 'next/server';
 import { createFirestorePort } from '@/lib/firestore-port';
+import { checkRateLimit, clientKey, tooMany } from '@/lib/rate-limit';
 import { runTurn } from '@/agent/turn';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+
+// Each chat turn costs model tokens, so this is the tight bucket.
+const CHAT_RULE = { perMinute: 8, burst: 4 };
 
 /**
  * One chat turn as a server-sent event stream. Events mirror the agent's
  * activity: tool presses, text deltas, then the final message.
  */
 export async function POST(request: NextRequest): Promise<Response> {
+  const limit = checkRateLimit(`chat:${clientKey(request)}`, CHAT_RULE);
+  if (!limit.allowed) return tooMany(limit.retryAfterSeconds);
+
   const body = (await request.json()) as { sessionId?: string; message?: string };
   const sessionId = body.sessionId?.slice(0, 64);
   const message = body.message?.slice(0, 4000);
