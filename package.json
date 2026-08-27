@@ -13,10 +13,12 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "eslint packages apps",
     "test": "npm run test --workspaces --if-present",
-    "dev": "npm run dev --workspace @amalthea/demo"
+    "dev": "npm run dev --workspace @amalthea/demo",
+    "emulator": "firebase emulators:start --only firestore --project demo-amalthea"
   },
   "devDependencies": {
     "@types/node": "^24.3.0",
+    "firebase-tools": "^15.1.0",
     "eslint": "^9.34.0",
     "tsx": "^4.20.0",
     "typescript": "^5.9.0",
