@@ -1,4 +1,4 @@
-import { householdAllergens } from './allergens';
+import { householdAllergenReport } from './allergens';
 import { missingInterviewAnswers } from './interview';
 import type { Adjustment, Household, Preferences } from './types';
 
@@ -14,7 +14,7 @@ export function buildSystemInstruction(input: {
   adjustments: readonly Adjustment[];
 }): string {
   const { household, preferences, adjustments } = input;
-  const allergens = householdAllergens(household);
+  const { enforced: allergens, unrecognized } = householdAllergenReport(household);
   const missing = missingInterviewAnswers(preferences);
 
   const memberLine = household.members
@@ -76,6 +76,17 @@ export function buildSystemInstruction(input: {
     );
   } else {
     sections.push('No allergens are recorded for this household. Make no health claims.');
+  }
+
+  if (unrecognized.length > 0) {
+    // Never let the assistant promise enforcement the table cannot deliver.
+    sections.push(
+      `IMPORTANT: this household also records ${unrecognized.join(', ')}, which the ` +
+        'lookup table does not cover. Ingredient scanning does NOT back those up. ' +
+        'Never say they are enforced or filtered. Say plainly that you cannot ' +
+        'check them automatically, and that the user must confirm those ' +
+        'ingredients themselves.',
+    );
   }
 
   sections.push(

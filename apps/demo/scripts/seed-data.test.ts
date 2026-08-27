@@ -67,6 +67,24 @@ describe('seed inventory and prices', () => {
     }
   });
 
+  it('uses the pantry unit whenever an ingredient is already stocked', () => {
+    // A recipe in oz against a pantry in lb cannot subtract, so the grocery
+    // list asks for something the pantry card shows sitting right there.
+    const pantryUnits = new Map(
+      inventory.map((item) => [normalizeIngredientName(item.name), item.unit]),
+    );
+    const mismatches: string[] = [];
+    for (const recipe of recipes) {
+      for (const ingredient of recipe.ingredients) {
+        const stocked = pantryUnits.get(normalizeIngredientName(ingredient.name));
+        if (stocked && stocked !== ingredient.unit) {
+          mismatches.push(`${recipe.id}: ${ingredient.name} ${ingredient.unit} vs pantry ${stocked}`);
+        }
+      }
+    }
+    expect(mismatches).toEqual([]);
+  });
+
   it('freezes the Reyes family as specified', () => {
     expect(household.members.map((member) => member.name)).toEqual([
       'Dana',

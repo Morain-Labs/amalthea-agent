@@ -32,7 +32,9 @@ export function checkRateLimit(
     bucket = { tokens: capacity, lastRefill: now };
     buckets.set(key, bucket);
   }
-  const refill = ((now - bucket.lastRefill) / 60_000) * rule.perMinute;
+  // Clamp at zero: a backwards clock would otherwise drain the bucket and
+  // lock a caller out.
+  const refill = Math.max(0, ((now - bucket.lastRefill) / 60_000) * rule.perMinute);
   bucket.tokens = Math.min(capacity, bucket.tokens + refill);
   bucket.lastRefill = now;
   if (bucket.tokens >= 1) {
@@ -46,10 +48,18 @@ export function checkRateLimit(
   };
 }
 
-/** Client IP as Cloud Run reports it (first x-forwarded-for hop), else a shared bucket. */
+/**
+ * Client IP as Cloud Run reports it. Cloud Run APPENDS the real client IP to
+ * whatever X-Forwarded-For the caller sent, so the last hop is the trusted
+ * one. Reading the first hop would let anyone rotate a fake value and walk
+ * straight past the limit.
+ */
 export function clientKey(request: Request): string {
-  const forwarded = request.headers.get('x-forwarded-for');
-  return forwarded?.split(',')[0]?.trim() || 'unknown';
+  const hops = (request.headers.get('x-forwarded-for') ?? '')
+    .split(',')
+    .map((hop) => hop.trim())
+    .filter(Boolean);
+  return hops[hops.length - 1] ?? 'unknown';
 }
 
 export function tooMany(retryAfterSeconds: number): Response {

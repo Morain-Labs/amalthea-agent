@@ -337,7 +337,10 @@ export const recipes: Recipe[] = [
     title: 'Shrimp Scampi',
     ingredients: [
       { name: 'shrimp', quantity: 1, unit: 'lb' },
-      { name: 'spaghetti', quantity: 12, unit: 'oz' },
+      // Units match the pantry's (lb) so the delta can subtract. A recipe in
+      // oz against a pantry in lb puts an item on the list the kitchen
+      // already has, right next to the pantry card showing it.
+      { name: 'spaghetti', quantity: 0.75, unit: 'lb' },
       { name: 'butter', quantity: 4, unit: 'tbsp' },
       { name: 'garlic', quantity: 5, unit: 'clove' },
       { name: 'lemon', quantity: 1, unit: 'count' },
@@ -365,7 +368,7 @@ export const recipes: Recipe[] = [
     id: 'r-minestrone',
     title: 'Minestrone',
     ingredients: [
-      { name: 'pasta', quantity: 8, unit: 'oz' },
+      { name: 'pasta', quantity: 0.5, unit: 'lb' },
       { name: 'white beans', quantity: 2, unit: 'can' },
       { name: 'zucchini', quantity: 2, unit: 'count' },
       { name: 'carrots', quantity: 2, unit: 'count' },

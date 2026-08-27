@@ -43,10 +43,12 @@ export function buildGroceryList(input: {
   for (const [key, need] of needs) {
     const have = stock.get(key) ?? 0;
     const remaining = need.quantity - have;
-    if (remaining <= 0) continue;
+    // Float subtraction leaves residue (0.1 + 0.2 - 0.3), which would render
+    // as a scientific-notation shopping line. Treat a sliver as covered.
+    if (remaining < 1e-9) continue;
     lines.push({
       name: need.name,
-      quantity: remaining,
+      quantity: Math.round(remaining * 100) / 100,
       unit: need.unit,
       bestPrice: cheapestHint(need.name, need.unit, input.priceHints),
     });

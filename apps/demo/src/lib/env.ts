@@ -40,9 +40,10 @@ function applyEnvFile(path: string): void {
     const existing = process.env[key];
     if (existing !== undefined) {
       if (deployed || existing === value) continue;
+      // Name only. Printing even a prefix of a live credential puts it in
+      // stdout and any log sink downstream.
       console.warn(
-        `[env] ${key} from the environment is being overridden by .env.local ` +
-          `(machine value starts "${existing.slice(0, 6)}", file value starts "${value.slice(0, 6)}").`,
+        `[env] ${key} is set in the environment and is being overridden by .env.local.`,
       );
     }
     process.env[key] = value;

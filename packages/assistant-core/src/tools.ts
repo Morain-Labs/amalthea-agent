@@ -179,8 +179,10 @@ export function createTools(port: DataPort, options: ToolOptions = {}): Assistan
     {
       name: 'swap_meal',
       description:
-        'Swaps one night\'s dinner for the next-best safe recipe not already ' +
-        'in the plan. Pinned meals are never swapped.',
+        'Swaps one night\'s dinner for the next safe recipe not already in ' +
+        'the plan, ranked by what expires soonest and what the kitchen ' +
+        'already holds. Asking again keeps moving through the options rather ' +
+        'than returning the meal just rejected. Pinned meals are never swapped.',
       parameters: swapArgs,
       execute: async (args) => {
         const { day } = swapArgs.parse(args);
@@ -193,18 +195,32 @@ export function createTools(port: DataPort, options: ToolOptions = {}): Assistan
             error: `${day} is pinned${meal.note ? ` (${meal.note})` : ''}. Unpin it first if you want it changed.`,
           };
         }
-        const [household, recipes] = await Promise.all([
+        const [household, recipes, inventory] = await Promise.all([
           port.getHousehold(),
           port.getRecipes(),
+          port.getInventory(),
         ]);
-        const swapped = swapMeal({ plan, recipes, household, day });
+        const swapped = swapMeal({
+          plan,
+          recipes,
+          household,
+          day,
+          inventory,
+          now: now(),
+        });
         if (!swapped) {
           return { error: 'Every safe recipe is already on the plan, nothing to swap in.' };
         }
-        await port.savePlan(swapped);
-        const newMeal = swapped.meals.find((planned) => planned.day === day);
-        const title = recipes.find((recipe) => recipe.id === newMeal?.recipeId)?.title;
-        return { day, recipeId: newMeal?.recipeId, title };
+        await port.savePlan(swapped.plan);
+        const title = recipes.find(
+          (recipe) => recipe.id === swapped.replacement.recipeId,
+        )?.title;
+        return {
+          day,
+          recipeId: swapped.replacement.recipeId,
+          title,
+          reasons: swapped.replacement.reasons,
+        };
       },
     },
     {

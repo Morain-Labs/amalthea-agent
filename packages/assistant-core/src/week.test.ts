@@ -199,8 +199,8 @@ describe('swapMeal', () => {
   };
 
   it('replaces only the named day with a different safe recipe', () => {
-    const result = swapMeal({ plan, recipes: pool, household, day: 'monday' });
-    expect(result).not.toBeNull();
+    const result = swapMeal({ plan, recipes: pool, household, day: 'monday' })?.plan;
+    expect(result).not.toBeUndefined();
     const before = plan.meals.find((meal) => meal.day === 'monday');
     const after = result?.meals.find((meal) => meal.day === 'monday');
     expect(after?.recipeId).toBeDefined();
@@ -240,9 +240,45 @@ describe('swapMeal', () => {
     expect(swapMeal({ plan: pinnedPlan, recipes: pool, household, day: 'monday' })).toBeNull();
   });
 
+  it('never hands back the meal just rejected', () => {
+    // The old behavior restarted at the cheapest option every time, so two
+    // recipes traded places forever and asking twice returned the meal the
+    // user had just turned down.
+    let working = plan;
+    const rejected: string[] = [];
+    for (let round = 0; round < 4; round++) {
+      const before = working.meals.find((meal) => meal.day === 'monday')?.recipeId;
+      const result = swapMeal({ plan: working, recipes: pool, household, day: 'monday' });
+      if (!result || !before) break;
+      const after = result.replacement.recipeId;
+      expect(after, 'swap must actually change the meal').not.toBe(before);
+      const justRejected = rejected[rejected.length - 1];
+      if (justRejected) {
+        expect(after, 'must not revert to the previous meal').not.toBe(justRejected);
+      }
+      rejected.push(before);
+      working = result.plan;
+    }
+    expect(rejected.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('returns reasons so the assistant can explain the new pick', () => {
+    const result = swapMeal({
+      plan,
+      recipes: pool,
+      household,
+      day: 'monday',
+      inventory: [
+        { id: 'i-carrots', name: 'carrots', quantity: 6, unit: 'lb', location: 'fridge' },
+      ],
+      now: '2026-08-26T12:00:00.000Z',
+    });
+    expect(result?.replacement.reasons.join(' ')).toMatch(/already in the kitchen/);
+  });
+
   it('never swaps in an excluded recipe', () => {
     for (const day of ['monday', 'wednesday', 'friday'] as const) {
-      const result = swapMeal({ plan, recipes: pool, household, day });
+      const result = swapMeal({ plan, recipes: pool, household, day })?.plan;
       const swapped = result?.meals.find((meal) => meal.day === day);
       if (!swapped) continue;
       const picked = pool.find((r) => r.id === swapped.recipeId);

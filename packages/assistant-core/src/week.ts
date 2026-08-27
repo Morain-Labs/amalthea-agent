@@ -79,6 +79,15 @@ function scoreRecipes(
   return scores;
 }
 
+/** Best first: expiring and pantry overlap, then price, then id for stability. */
+function orderByScore(recipes: readonly Recipe[], scores: Map<string, RecipeScore>): Recipe[] {
+  return [...recipes].sort((a, b) => {
+    const scoreA = scores.get(a.id)?.score ?? 0;
+    const scoreB = scores.get(b.id)?.score ?? 0;
+    return scoreB - scoreA || a.estimatedCost - b.estimatedCost || a.id.localeCompare(b.id);
+  });
+}
+
 function reasonsFor(
   score: RecipeScore | undefined,
   extra: { anchorTag?: string; pinnedNote?: string },
@@ -164,11 +173,7 @@ export function proposeWeek(input: {
     }
   }
 
-  const fillOrder = [...safe].sort((a, b) => {
-    const scoreA = scores.get(a.id)?.score ?? 0;
-    const scoreB = scores.get(b.id)?.score ?? 0;
-    return scoreB - scoreA || a.estimatedCost - b.estimatedCost || a.id.localeCompare(b.id);
-  });
+  const fillOrder = orderByScore(safe, scores);
 
   for (const day of cookNights) {
     if (meals.some((meal) => meal.day === day)) continue;
@@ -186,32 +191,63 @@ export function proposeWeek(input: {
 }
 
 /**
- * Swaps one night for the next-best safe recipe not already in the plan.
- * Returns null when the day has no meal or the meal is pinned: pins are the
- * user's word, the assistant does not override them.
+ * Swaps one night for the next safe recipe not already in the plan, ranked
+ * the same way proposeWeek ranks: expiring first, then pantry overlap, then
+ * price. Returns null when the day has no meal or the meal is pinned, since
+ * pins are the user's word and the assistant does not override them.
+ *
+ * Repeated swaps walk forward through the ranking from the current pick
+ * rather than restarting at the top. Restarting made the two cheapest
+ * recipes trade places forever, so asking twice handed back the meal that
+ * was just rejected.
  */
 export function swapMeal(input: {
   plan: WeekPlan;
   recipes: readonly Recipe[];
   household: Household;
   day: Day;
-}): WeekPlan | null {
+  inventory?: readonly InventoryItem[];
+  now?: string;
+}): { plan: WeekPlan; replacement: ProposedMeal } | null {
   const current = input.plan.meals.find((meal) => meal.day === input.day);
   if (!current || current.pinned) return null;
 
   const exclusions = householdAllergens(input.household);
   const { safe } = filterSafeRecipes(input.recipes, exclusions);
+  if (safe.length === 0) return null;
+
+  const scores = scoreRecipes(
+    safe,
+    input.inventory ?? [],
+    input.now ?? new Date().toISOString(),
+  );
+  const ordered = orderByScore(safe, scores);
   const inPlan = new Set(input.plan.meals.map((meal) => meal.recipeId));
 
-  const replacement = [...safe]
-    .filter((recipe) => !inPlan.has(recipe.id))
-    .sort((a, b) => a.estimatedCost - b.estimatedCost || a.id.localeCompare(b.id))[0];
+  const currentIndex = ordered.findIndex((recipe) => recipe.id === current.recipeId);
+  const start = currentIndex >= 0 ? currentIndex + 1 : 0;
+
+  let replacement: Recipe | undefined;
+  for (let step = 0; step < ordered.length; step++) {
+    const candidate = ordered[(start + step) % ordered.length];
+    if (!candidate || candidate.id === current.recipeId || inPlan.has(candidate.id)) continue;
+    replacement = candidate;
+    break;
+  }
   if (!replacement) return null;
 
+  const swapped: ProposedMeal = {
+    day: input.day,
+    recipeId: replacement.id,
+    reasons: reasonsFor(scores.get(replacement.id), {}),
+  };
   return {
-    ...input.plan,
-    meals: input.plan.meals.map((meal) =>
-      meal.day === input.day ? { day: input.day, recipeId: replacement.id } : meal,
-    ),
+    plan: {
+      ...input.plan,
+      meals: input.plan.meals.map((meal) =>
+        meal.day === input.day ? { day: input.day, recipeId: replacement.id } : meal,
+      ),
+    },
+    replacement: swapped,
   };
 }
