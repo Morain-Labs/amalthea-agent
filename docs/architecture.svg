@@ -72,7 +72,7 @@
   <text x="558" y="227" font-size="12.5" fill="#3c4653" text-anchor="middle">@google/adk for TypeScript</text>
   <text x="558" y="243" font-size="12.5" fill="#3c4653" text-anchor="middle">running Gemini 3.7 Flash</text>
 
-  <text x="416" y="212" font-size="12.5" fill="#59616b" text-anchor="end">same tools, no model call</text>
+  <text x="416" y="212" font-size="12.5" fill="#59616b" text-anchor="end">same data port, no model call</text>
 
   <rect x="236" y="254" width="440" height="312" rx="12" fill="#fbfbfa" stroke="#3c4653" stroke-width="2.4"/>
   <rect x="246" y="244" width="168" height="24" rx="6" fill="#e6e8ea" stroke="#3c4653" stroke-width="1.6"/>

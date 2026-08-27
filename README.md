@@ -38,7 +38,8 @@ blocks. The table is an assistive filter, not a safety certification.
 
 ## Spin-up
 
-Install and run the test suite. Neither step needs an API key or the emulator.
+Requires Node 24.13 or newer. Install and run the test suite. Neither step
+needs an API key or the emulator.
 
 ```bash
 npm ci
@@ -60,8 +61,9 @@ To run the agent locally:
    ```
 
 3. Seed the synthetic Reyes household into the emulator, in a second terminal.
-   The seed script refuses to write to live Firestore unless `SEED_LIVE=true` is
-   set explicitly, so a stray run cannot touch a real project.
+   The seed script targets the local emulator by default and only writes to
+   live Firestore when `SEED_LIVE=true` is set explicitly, so a stray run
+   cannot touch a real project.
 
    ```bash
    npm run seed --workspace @amalthea/demo
