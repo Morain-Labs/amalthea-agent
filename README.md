@@ -8,6 +8,8 @@ it has and buys only what it needs.
 
 Built for the All Things Agentic hackathon on Devpost.
 
+**Live demo:** https://amalthea-demo-947902910401.us-east1.run.app
+
 **Disclosure: all code in this repository was newly created during the
 submission period. No pre-existing code.**
 
@@ -52,4 +54,7 @@ To run the agent locally:
 
 Diagram lands with the submission. Shape: Next.js UI to API route to ADK agent
 on Gemini 3.7 Flash, through the tools layer (the only write path) to
-Firestore.
+Firestore. On Cloud Run the model runs on Vertex AI (Gemini 3.x is served from
+the global endpoint) with Application Default Credentials, flipped by one env
+flag. Adversarial testing and endpoint protection are written up in
+[docs/adversarial-testing.md](docs/adversarial-testing.md).
