@@ -1,0 +1,1 @@
+export { normalizeIngredientName } from './ingredients';
