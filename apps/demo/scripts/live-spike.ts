@@ -1,15 +1,19 @@
 /**
  * Live spike: can ADK-JS run a Gemini Live (bidirectional) session? Opens a
- * live session in TEXT modality against the live-capable model, sends one
- * message through the LiveRequestQueue, and reports what comes back. TEXT
- * keeps the spike free of audio plumbing. The audio path uses the same
- * runLive entry point with AUDIO modality plus a speechConfig.
+ * live session against the live-capable model, sends one message through the
+ * LiveRequestQueue, and reports what comes back.
  *
- * Known limit, verified 2026-08-26: the Live endpoint rejects free-tier AI
- * Studio keys (close 1007, "API key not valid") on every live model, while
- * the same key passes generateContent. Expect this to pass only with an
- * entitled key or on the Vertex backend (GOOGLE_GENAI_USE_VERTEXAI=true with
- * ADC). ADK surfaces that rejection as a silent hang, hence the watchdog.
+ * Modality note, learned the hard way: gemini-3.1-flash-live-preview does
+ * NOT support TEXT output. It is a speech model and only returns AUDIO.
+ * Asking for TEXT closes the socket with 1007. So the spike asks for AUDIO
+ * and turns on output transcription to get readable proof of what was said.
+ *
+ * Credential note, verified 2026-08-27: Live needs a billing-enabled AI
+ * Studio key. A free-tier key is rejected with close 1007 ("API key not
+ * valid") even though that same key works fine for generateContent, so the
+ * error is misleading. ADK surfaces the rejection as a silent hang, hence
+ * the watchdog. Vertex is a separate story: the Live models are not served
+ * to this project there, so Live runs on the AI Studio key.
  *
  *   npm run live-spike --workspace @amalthea/demo
  */
@@ -48,24 +52,32 @@ queue.sendContent({
   role: 'user',
   parts: [{ text: 'Reply with one short greeting sentence.' }],
 });
-// Per the SDK's own runLive tests: closing the queue marks end of input and
-// lets the generator finish naturally after the model's reply.
-queue.close();
+// Do NOT close the queue here. Closing it right after sending ends the
+// session before the model streams its audio back, which looks exactly like
+// a hang. Close it once the turn completes instead.
 
-let received = '';
+let transcript = '';
+let audioBytes = 0;
 try {
   for await (const event of runner.runLive({
     userId: 'local-dev',
     sessionId: session.id,
     liveRequestQueue: queue,
-    runConfig: { responseModalities: [Modality.TEXT] },
+    runConfig: {
+      responseModalities: [Modality.AUDIO],
+      outputAudioTranscription: {},
+    },
   })) {
     if (event.errorMessage) {
       console.error(`error event: ${event.errorCode ?? '?'} ${event.errorMessage}`);
       break;
     }
-    const text = (event.content?.parts ?? []).map((part) => part.text ?? '').join('');
-    if (text) received += text;
+    for (const part of event.content?.parts ?? []) {
+      if (part.inlineData?.data) {
+        audioBytes += Buffer.from(part.inlineData.data, 'base64').length;
+      }
+    }
+    if (event.outputTranscription?.text) transcript += event.outputTranscription.text;
     if (event.turnComplete) break;
   }
 } finally {
@@ -73,10 +85,11 @@ try {
   clearTimeout(watchdog);
 }
 
-console.log(`live reply: ${received.trim()}`);
-if (received.trim()) {
-  console.log('LIVE SPIKE: YES (bidirectional live session over ADK-JS runLive)');
+console.log(`spoken transcript: ${transcript.trim()}`);
+console.log(`audio received: ${audioBytes} bytes`);
+if (audioBytes > 0) {
+  console.log('LIVE SPIKE: YES (bidirectional live audio session over ADK-JS runLive)');
   process.exit(0);
 }
-console.error('LIVE SPIKE: NO (session opened but no text came back)');
+console.error('LIVE SPIKE: NO (session opened but no audio came back)');
 process.exit(1);

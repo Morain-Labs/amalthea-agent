@@ -4,8 +4,13 @@ import { dirname, join } from 'node:path';
 /**
  * Loads the repo-root `.env.local` (gitignored, holds GEMINI_API_KEY) into
  * process.env. Walks up from the working directory so it works from the app
- * dir, the repo root, and script runners. Values already present in the
- * environment always win, so Cloud Run env vars are never overridden.
+ * dir, the repo root, and script runners.
+ *
+ * Precedence: on a deployed service (Cloud Run sets K_SERVICE) the real
+ * environment always wins, so nothing can override deploy config. Locally
+ * `.env.local` wins instead, because a stale machine-level GEMINI_API_KEY
+ * silently shadowing the project's key costs hours to find. Shadowed keys
+ * are reported rather than swallowed.
  */
 export function loadRootEnv(): void {
   let dir = process.cwd();
@@ -22,6 +27,8 @@ export function loadRootEnv(): void {
 }
 
 function applyEnvFile(path: string): void {
+  // A deployed service (Cloud Run) keeps its own environment, always.
+  const deployed = process.env.K_SERVICE !== undefined;
   const text = readFileSync(path, 'utf8');
   for (const line of text.split(/\r?\n/)) {
     const match = /^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*?)\s*$/.exec(line);
@@ -29,7 +36,15 @@ function applyEnvFile(path: string): void {
     const key = match[1];
     const rawValue = match[2];
     if (key === undefined || rawValue === undefined) continue;
-    if (process.env[key] !== undefined) continue;
-    process.env[key] = rawValue.replace(/^(["'])(.*)\1$/, '$2');
+    const value = rawValue.replace(/^(["'])(.*)\1$/, '$2');
+    const existing = process.env[key];
+    if (existing !== undefined) {
+      if (deployed || existing === value) continue;
+      console.warn(
+        `[env] ${key} from the environment is being overridden by .env.local ` +
+          `(machine value starts "${existing.slice(0, 6)}", file value starts "${value.slice(0, 6)}").`,
+      );
+    }
+    process.env[key] = value;
   }
 }
