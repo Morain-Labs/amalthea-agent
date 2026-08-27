@@ -686,6 +686,23 @@ export interface SeedPriceHint extends Omit<PriceHint, 'seenAt'> {
   seenDaysAgo: number;
 }
 
+/** Turns the relative seed dates into concrete ones, for writers and tests. */
+export function materializeSeed(nowMs: number = Date.now()) {
+  const daysAgoIso = (days: number) => new Date(nowMs - days * 86_400_000).toISOString();
+  return {
+    household: { id: HOUSEHOLD_ID, ...household },
+    inventory: inventory.map(({ purchasedDaysAgo, ...item }) => ({
+      ...item,
+      purchasedAt: daysAgoIso(purchasedDaysAgo),
+    })),
+    recipes,
+    priceHints: priceHints.map(({ seenDaysAgo, ...hint }) => ({
+      ...hint,
+      seenAt: daysAgoIso(seenDaysAgo),
+    })),
+  };
+}
+
 export const priceHints: SeedPriceHint[] = [
   { itemName: 'ground beef', store: 'Valu-Mart', price: 4.99, unit: 'lb', seenDaysAgo: 6 },
   { itemName: 'ground beef', store: 'Greenfield Market', price: 5.79, unit: 'lb', seenDaysAgo: 4 },

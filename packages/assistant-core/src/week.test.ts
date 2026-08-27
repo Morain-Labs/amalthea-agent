@@ -100,6 +100,90 @@ describe('proposeWeek', () => {
   });
 });
 
+describe('proposeWeek, feedback and freshness', () => {
+  const NOW = '2026-08-26T12:00:00.000Z';
+
+  it('carries pinned meals from the current plan into the next proposal', () => {
+    const firstProposal = proposeWeek({
+      household,
+      recipes: pool,
+      preferences: { answers: {} },
+    });
+    const currentPlan: WeekPlan = {
+      id: 'p-old',
+      householdId: household.id,
+      createdAt: NOW,
+      meals: firstProposal.meals.map((meal) =>
+        meal.day === 'friday'
+          ? { day: meal.day, recipeId: meal.recipeId, pinned: true, note: 'grandma visits' }
+          : { day: meal.day, recipeId: meal.recipeId },
+      ),
+    };
+    const pinnedRecipe = currentPlan.meals.find((meal) => meal.day === 'friday')?.recipeId;
+    const next = proposeWeek({
+      household,
+      recipes: pool,
+      preferences: { answers: {} },
+      currentPlan,
+      now: NOW,
+    });
+    const friday = next.meals.find((meal) => meal.day === 'friday');
+    expect(friday?.recipeId).toBe(pinnedRecipe);
+    expect(friday?.pinned).toBe(true);
+    expect(friday?.note).toBe('grandma visits');
+    expect(friday?.reasons.join(' ')).toMatch(/pinned/);
+  });
+
+  it('prefers recipes that use what expires soonest and says so', () => {
+    const expiringRecipe: Recipe = {
+      id: 'r-expiring',
+      title: 'Uses the tomatoes',
+      ingredients: [{ name: 'tomatoes', quantity: 3, unit: 'count' }],
+      allergens: [],
+      tags: [],
+      estimatedCost: 12,
+      servings: 4,
+    };
+    const proposal = proposeWeek({
+      household,
+      recipes: [...pool, expiringRecipe],
+      preferences: { answers: {} },
+      inventory: [
+        {
+          id: 'i-tomatoes',
+          name: 'tomatoes',
+          quantity: 3,
+          unit: 'count',
+          location: 'fridge',
+          purchasedAt: '2026-08-23T00:00:00.000Z',
+          shelfLifeDays: 7,
+        },
+      ],
+      now: NOW,
+    });
+    // Cheaper recipes exist, but the expiring-tomatoes recipe must be in the
+    // week, with the reason said out loud.
+    const picked = proposal.meals.find((meal) => meal.recipeId === 'r-expiring');
+    expect(picked).toBeDefined();
+    expect(picked?.reasons.join(' ')).toMatch(/tomatoes before they expire/);
+  });
+
+  it('gives every filled night data-backed reasons when the kitchen overlaps', () => {
+    const proposal = proposeWeek({
+      household,
+      recipes: pool,
+      preferences: { answers: {} },
+      inventory: [
+        { id: 'i-carrots', name: 'carrots', quantity: 6, unit: 'count', location: 'fridge' },
+      ],
+      now: NOW,
+    });
+    for (const meal of proposal.meals) {
+      expect(meal.reasons.join(' ')).toMatch(/carrots already in the kitchen/);
+    }
+  });
+});
+
 describe('swapMeal', () => {
   const proposal = proposeWeek({
     household,

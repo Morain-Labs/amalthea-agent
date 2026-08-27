@@ -131,18 +131,28 @@ export function createTools(port: DataPort, options: ToolOptions = {}): Assistan
       parameters: proposeArgs,
       execute: async (args) => {
         const { anchorDay, anchorTag } = proposeArgs.parse(args);
-        const [household, recipes, preferences] = await Promise.all([
+        const [household, recipes, preferences, inventory, currentPlan] = await Promise.all([
           port.getHousehold(),
           port.getRecipes(),
           port.getPreferences(),
+          port.getInventory(),
+          port.getCurrentPlan(),
         ]);
         const anchor =
           anchorDay && anchorTag ? { day: anchorDay as Day, tag: anchorTag } : undefined;
-        const proposal = proposeWeek({ household, recipes, preferences, anchor });
+        const proposal = proposeWeek({
+          household,
+          recipes,
+          preferences,
+          inventory,
+          currentPlan,
+          anchor,
+          now: now(),
+        });
         const plan: WeekPlan = {
           id: newId(),
           householdId: household.id,
-          meals: proposal.meals,
+          meals: proposal.meals.map(({ reasons: _reasons, ...meal }) => meal),
           createdAt: now(),
         };
         await port.savePlan(plan);
@@ -151,10 +161,13 @@ export function createTools(port: DataPort, options: ToolOptions = {}): Assistan
           planId: plan.id,
           totalEstimatedCost: proposal.totalEstimatedCost,
           weeklyBudget: household.weeklyBudget,
-          meals: plan.meals.map((meal) => ({
+          meals: proposal.meals.map((meal) => ({
             day: meal.day,
             recipeId: meal.recipeId,
             title: titles.get(meal.recipeId),
+            pinned: meal.pinned,
+            note: meal.note,
+            reasons: meal.reasons,
           })),
           blocked: proposal.blocked.map((blockedRecipe) => ({
             title: blockedRecipe.recipe.title,

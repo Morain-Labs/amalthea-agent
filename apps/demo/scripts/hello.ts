@@ -1,15 +1,17 @@
 /**
- * Hello-agent: one end-to-end turn against the configured Gemini model,
- * locally via the Gemini API key in the repo-root .env.local. Retries on
- * transient errors (the free tier throws 503 under load) and falls back to
- * FALLBACK_MODEL on the last attempt, per the documented model ruling.
+ * Hello-agent: one end-to-end turn of the REAL assistant (instruction, tools,
+ * seeded household in memory, no emulator needed) against the configured
+ * Gemini model, locally via the key in the repo-root .env.local. Retries on
+ * transient errors and falls back to FALLBACK_MODEL on the last attempt.
  *
  *   npm run hello --workspace @amalthea/demo
  */
+import { createInMemoryPort } from '@amalthea/assistant-core';
 import { InMemoryRunner, getFunctionCalls, isFinalResponse } from '@google/adk';
-import { buildAgent } from '../src/agent/agent';
+import { buildAssistantAgent } from '../src/agent/assistant';
 import { FALLBACK_MODEL, modelId } from '../src/agent/model';
 import { loadRootEnv } from '../src/lib/env';
+import { materializeSeed } from './seed-data';
 
 loadRootEnv();
 
@@ -22,22 +24,26 @@ if (!process.env.GEMINI_API_KEY && process.env.GOOGLE_GENAI_USE_VERTEXAI !== 'tr
 
 interface TurnResult {
   finalText: string;
-  toolCalled: boolean;
+  toolsCalled: string[];
   error?: string;
 }
 
 async function runTurn(model: string): Promise<TurnResult> {
-  const runner = new InMemoryRunner({ agent: buildAgent(model), appName: 'amalthea-demo' });
-  const result: TurnResult = { finalText: '', toolCalled: false };
+  const seed = materializeSeed();
+  const port = createInMemoryPort(seed);
+  const agent = await buildAssistantAgent({ port, model });
+  const runner = new InMemoryRunner({ agent, appName: 'amalthea-hello' });
+  const result: TurnResult = { finalText: '', toolsCalled: [] };
+
   for await (const event of runner.runEphemeral({
     userId: 'local-dev',
     newMessage: {
       role: 'user',
-      parts: [{ text: 'Verify connectivity, then say hello in one sentence.' }],
+      parts: [{ text: 'What in the pantry expires soonest? One short sentence.' }],
     },
   })) {
-    if (getFunctionCalls(event).length > 0) {
-      result.toolCalled = true;
+    for (const call of getFunctionCalls(event)) {
+      result.toolsCalled.push(call.name ?? 'unknown');
     }
     if (event.errorMessage) {
       result.error = `${event.errorCode ?? 'error'}: ${event.errorMessage}`;
@@ -59,7 +65,7 @@ const attempts = [
   { model: FALLBACK_MODEL, waitMs: 2000 },
 ];
 
-let outcome: TurnResult = { finalText: '', toolCalled: false };
+let outcome: TurnResult = { finalText: '', toolsCalled: [] };
 let usedModel = '';
 
 for (const attempt of attempts) {
@@ -74,15 +80,15 @@ for (const attempt of attempts) {
 }
 
 console.log(`model that answered: ${usedModel}`);
-console.log(`tool called: ${outcome.toolCalled}`);
+console.log(`tools called: ${outcome.toolsCalled.join(', ') || 'none'}`);
 console.log(`final: ${outcome.finalText}`);
 
 if (!outcome.finalText) {
   console.error('FAIL: no final response after retries and fallback.');
   process.exit(1);
 }
-if (!outcome.toolCalled) {
-  console.error('FAIL: the ping tool was never called.');
+if (!outcome.toolsCalled.includes('get_pantry')) {
+  console.error('FAIL: the assistant never pressed get_pantry.');
   process.exit(1);
 }
-console.log('PASS: end-to-end agent turn with tool call.');
+console.log('PASS: end-to-end assistant turn with real tools.');

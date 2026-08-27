@@ -8,7 +8,7 @@
  */
 import { getDb } from '../src/lib/firestore-port';
 import { loadRootEnv } from '../src/lib/env';
-import { HOUSEHOLD_ID, household, inventory, priceHints, recipes } from './seed-data';
+import { HOUSEHOLD_ID, materializeSeed } from './seed-data';
 
 loadRootEnv();
 
@@ -19,10 +19,6 @@ if (!process.env.FIRESTORE_EMULATOR_HOST && process.env.SEED_LIVE !== 'true') {
 
 const db = getDb();
 const root = db.collection('households').doc(HOUSEHOLD_ID);
-
-function daysAgoIso(days: number): string {
-  return new Date(Date.now() - days * 86_400_000).toISOString();
-}
 
 async function clearCollection(name: string): Promise<void> {
   const snapshot = await root.collection(name).get();
@@ -37,31 +33,26 @@ try {
     await clearCollection(name);
   }
 
+  const seed = materializeSeed();
   const batch = db.batch();
-  batch.set(root, household);
-  for (const item of inventory) {
-    const { id, purchasedDaysAgo, ...rest } = item;
-    batch.set(root.collection('inventory').doc(id), {
-      ...rest,
-      purchasedAt: daysAgoIso(purchasedDaysAgo),
-    });
+  const { id: _householdId, ...householdDoc } = seed.household;
+  batch.set(root, householdDoc);
+  for (const item of seed.inventory) {
+    const { id, ...rest } = item;
+    batch.set(root.collection('inventory').doc(id), rest);
   }
-  for (const recipe of recipes) {
+  for (const recipe of seed.recipes) {
     const { id, ...rest } = recipe;
     batch.set(root.collection('recipes').doc(id), rest);
   }
-  priceHints.forEach((hint, index) => {
-    const { seenDaysAgo, ...rest } = hint;
-    batch.set(root.collection('priceHints').doc(`ph-${index}`), {
-      ...rest,
-      seenAt: daysAgoIso(seenDaysAgo),
-    });
+  seed.priceHints.forEach((hint, index) => {
+    batch.set(root.collection('priceHints').doc(`ph-${index}`), hint);
   });
   await batch.commit();
 
   console.log(
-    `Seeded household ${HOUSEHOLD_ID}: ${inventory.length} inventory items, ` +
-      `${recipes.length} recipes, ${priceHints.length} price hints.`,
+    `Seeded household ${HOUSEHOLD_ID}: ${seed.inventory.length} inventory items, ` +
+      `${seed.recipes.length} recipes, ${seed.priceHints.length} price hints.`,
   );
   process.exit(0);
 } catch (error) {
