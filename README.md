@@ -38,23 +38,58 @@ blocks. The table is an assistive filter, not a safety certification.
 
 ## Spin-up
 
+Install and run the test suite. Neither step needs an API key or the emulator.
+
 ```bash
 npm ci
 npm test
 ```
 
+That runs 75 tests across `assistant-core` and the demo app.
+
 To run the agent locally:
 
-1. Copy `env.example` to `.env.local` at the repo root and set
-   `GEMINI_API_KEY` (a free AI Studio key works).
-2. More spin-up steps land as the build proceeds (seeded Firestore emulator,
-   demo UI, Cloud Run deploy).
+1. Copy `env.example` to `.env.local` at the repo root and set `GEMINI_API_KEY`.
+   A free AI Studio key works for chat.
+
+2. Start the Firestore emulator and leave it running in its own terminal. This
+   needs Java installed.
+
+   ```bash
+   npm run emulator
+   ```
+
+3. Seed the synthetic Reyes household into the emulator, in a second terminal.
+   The seed script refuses to write to live Firestore unless `SEED_LIVE=true` is
+   set explicitly, so a stray run cannot touch a real project.
+
+   ```bash
+   npm run seed --workspace @amalthea/demo
+   ```
+
+4. Start the dev server and open http://localhost:3000.
+
+   ```bash
+   npm run dev
+   ```
+
+The emulator keeps nothing between runs, so a restart gives you an empty
+database. Reseeding takes a couple of seconds, so just run the seed command
+again.
+
+**Warning: `npm run build` followed by `npm start` does not work locally,
+because neither script exists at the repo root.** Production runs from the
+`Dockerfile` on Cloud Run instead, serving the standalone Next output that bakes
+its config in at build time and never evaluates `next.config.ts`, where the
+repo-root env loading and the emulator default live.
 
 ## Architecture
 
-Diagram lands with the submission. Shape: Next.js UI to API route to ADK agent
-on Gemini 3.7 Flash, through the tools layer (the only write path) to
-Firestore. On Cloud Run the model runs on Vertex AI (Gemini 3.x is served from
-the global endpoint) with Application Default Credentials, flipped by one env
-flag. Adversarial testing and endpoint protection are written up in
+![Amalthea architecture](docs/architecture.svg)
+
+Next.js UI to API route to ADK agent on Gemini 3.7 Flash, through the tools
+layer (the only write path) to Firestore. On Cloud Run the model runs on Vertex
+AI (Gemini 3.x is served from the global endpoint) with Application Default
+Credentials, flipped by one env flag. Adversarial testing and endpoint
+protection are written up in
 [docs/adversarial-testing.md](docs/adversarial-testing.md).

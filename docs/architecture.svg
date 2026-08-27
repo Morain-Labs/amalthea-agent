@@ -1,0 +1,153 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640" width="960" height="640" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" role="img" aria-label="Amalthea architecture diagram">
+  <title>Amalthea, one brain behind a chat</title>
+
+  <defs>
+    <marker id="ad" markerWidth="9" markerHeight="8" refX="7.6" refY="3.5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 0 L8 3.5 L0 7 Z" fill="#3c4653"/>
+    </marker>
+    <marker id="av" markerWidth="9" markerHeight="8" refX="7.6" refY="3.5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 0 L8 3.5 L0 7 Z" fill="#6b3fa0"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="960" height="640" fill="#f4f4f2"/>
+
+  <text x="16" y="32" font-size="21" font-weight="700" fill="#16181c">Amalthea, one brain behind a chat</text>
+  <text x="16" y="54" font-size="13.5" fill="#4b535d">Gemini 3.7 Flash on Vertex AI, ADK for TypeScript, Cloud Run, Firestore</text>
+
+  <rect x="212" y="64" width="736" height="564" rx="14" fill="#edf3fd" stroke="#1a73e8" stroke-width="1.8" stroke-dasharray="8 5"/>
+  <text x="224" y="84" font-size="13.5" font-weight="700" fill="#1256b8">Google Cloud</text>
+
+  <rect x="14" y="90" width="186" height="38" rx="8" fill="#e6e8ea" stroke="#b0b7bf" stroke-width="1.2"/>
+  <text x="107" y="114" font-size="13.5" font-weight="600" fill="#1c1f23" text-anchor="middle">Household member</text>
+
+  <rect x="14" y="144" width="186" height="172" rx="10" fill="#ffffff" stroke="#c3c8ce" stroke-width="1.2"/>
+  <text x="24" y="166" font-size="14" font-weight="700" fill="#1c1f23">Browser</text>
+  <text x="24" y="184" font-size="13" fill="#4b535d">Next.js 16 demo UI</text>
+  <line x1="24" y1="194" x2="190" y2="194" stroke="#dde0e4" stroke-width="1"/>
+  <text x="24" y="212" font-size="13" font-weight="600" fill="#1c1f23">Chat panel</text>
+  <text x="24" y="236" font-size="13" font-weight="600" fill="#1c1f23">Live kitchen panel</text>
+  <text x="34" y="255" font-size="13" fill="#4b535d">Pantry</text>
+  <text x="34" y="272" font-size="13" fill="#4b535d">This week</text>
+  <text x="34" y="289" font-size="13" fill="#4b535d">Grocery list</text>
+  <text x="34" y="306" font-size="13" fill="#4b535d">plan minus pantry</text>
+
+  <rect x="14" y="326" width="186" height="102" rx="10" fill="#ffffff" stroke="#c3c8ce" stroke-width="1.2"/>
+  <text x="24" y="348" font-size="13" font-weight="700" fill="#1c1f23">Package boundary</text>
+  <text x="24" y="366" font-size="13" fill="#4b535d">assistant-core is host</text>
+  <text x="24" y="383" font-size="13" fill="#4b535d">independent. Another app</text>
+  <text x="24" y="400" font-size="13" fill="#4b535d">installs the same brain</text>
+  <text x="24" y="417" font-size="13" fill="#4b535d">through the same DataPort.</text>
+
+  <rect x="14" y="440" width="186" height="96" rx="10" fill="#ffffff" stroke="#c3c8ce" stroke-width="1.2"/>
+  <text x="24" y="460" font-size="13" font-weight="700" fill="#1c1f23">Legend</text>
+  <path d="M26 478 L48 478" fill="none" stroke="#3c4653" stroke-width="1.8" marker-end="url(#ad)"/>
+  <text x="58" y="482" font-size="13" fill="#4b535d">Data and tool calls</text>
+  <path d="M26 504 L48 504" fill="none" stroke="#6b3fa0" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#av)"/>
+  <text x="58" y="508" font-size="13" fill="#4b535d">Model calls to</text>
+  <text x="58" y="524" font-size="13" fill="#4b535d">Vertex AI</text>
+
+  <rect x="14" y="548" width="186" height="82" rx="10" fill="#ffffff" stroke="#c3c8ce" stroke-width="1.2"/>
+  <text x="24" y="568" font-size="13" font-weight="700" fill="#1c1f23">Note</text>
+  <text x="24" y="586" font-size="13" fill="#4b535d">The allergen filter is</text>
+  <text x="24" y="603" font-size="13" fill="#4b535d">assistive, not a safety</text>
+  <text x="24" y="620" font-size="13" fill="#4b535d">certification.</text>
+
+  <rect x="226" y="94" width="460" height="522" rx="12" fill="#fbfcfe" stroke="#7ba7e8" stroke-width="1.5"/>
+  <text x="236" y="113" font-size="13" font-weight="700" fill="#1256b8">Cloud Run service, min instances 0, max instances 2</text>
+
+  <rect x="236" y="118" width="440" height="24" rx="6" fill="#e6e8ea" stroke="#aeb5bd" stroke-width="1.1"/>
+  <text x="456" y="134" font-size="13" font-weight="600" fill="#33383e" text-anchor="middle">Per IP rate limiter on both routes</text>
+
+  <rect x="236" y="150" width="216" height="36" rx="8" fill="#ffffff" stroke="#c3c8ce" stroke-width="1.2"/>
+  <text x="344" y="168" font-size="13.5" font-weight="700" fill="#1c1f23" text-anchor="middle">/api/state</text>
+  <text x="344" y="182" font-size="12.5" fill="#4b535d" text-anchor="middle">kitchen panel reads</text>
+
+  <rect x="462" y="150" width="214" height="36" rx="8" fill="#ffffff" stroke="#c3c8ce" stroke-width="1.2"/>
+  <text x="569" y="168" font-size="13.5" font-weight="700" fill="#1c1f23" text-anchor="middle">/api/chat</text>
+  <text x="569" y="182" font-size="12.5" fill="#4b535d" text-anchor="middle">server sent events stream</text>
+
+  <rect x="440" y="192" width="236" height="56" rx="8" fill="#e8f0fe" stroke="#7ba7e8" stroke-width="1.4"/>
+  <text x="558" y="210" font-size="13.5" font-weight="700" fill="#1c1f23" text-anchor="middle">ADK agent runtime</text>
+  <text x="558" y="227" font-size="12.5" fill="#3c4653" text-anchor="middle">@google/adk for TypeScript</text>
+  <text x="558" y="243" font-size="12.5" fill="#3c4653" text-anchor="middle">running Gemini 3.7 Flash</text>
+
+  <text x="416" y="212" font-size="12.5" fill="#59616b" text-anchor="end">same tools, no model call</text>
+
+  <rect x="236" y="254" width="440" height="312" rx="12" fill="#fbfbfa" stroke="#3c4653" stroke-width="2.4"/>
+  <rect x="246" y="244" width="168" height="24" rx="6" fill="#e6e8ea" stroke="#3c4653" stroke-width="1.6"/>
+  <text x="330" y="261" font-size="13" font-weight="700" fill="#1c1f23" text-anchor="middle">packages/assistant-core</text>
+
+  <rect x="246" y="276" width="420" height="102" rx="8" fill="#eef3fb" stroke="#b7c9e6" stroke-width="1.2"/>
+  <text x="254" y="296" font-size="13" font-weight="700" fill="#1c1f23">Tool layer, 8 tools</text>
+  <rect x="456" y="282" width="202" height="20" rx="5" fill="#d7e6fb" stroke="#1a73e8" stroke-width="1.1"/>
+  <text x="557" y="296" font-size="12.5" font-weight="700" fill="#12417f" text-anchor="middle">The only write path to data</text>
+  <text x="254" y="324" font-size="13" fill="#1c1f23">get_pantry</text>
+  <text x="388" y="324" font-size="13" fill="#1c1f23">get_recipes</text>
+  <text x="522" y="324" font-size="13" fill="#1c1f23">propose_week</text>
+  <text x="254" y="346" font-size="13" fill="#1c1f23">swap_meal</text>
+  <text x="388" y="346" font-size="13" fill="#1c1f23">build_grocery_list</text>
+  <text x="522" y="346" font-size="13" fill="#1c1f23">pin_meal_with_note</text>
+  <text x="254" y="368" font-size="13" fill="#1c1f23">save_adjustment</text>
+  <text x="388" y="368" font-size="13" fill="#1c1f23">set_preferences</text>
+
+  <rect x="246" y="386" width="118" height="36" rx="7" fill="#ffffff" stroke="#c3c8ce" stroke-width="1.2"/>
+  <text x="305" y="409" font-size="13" fill="#1c1f23" text-anchor="middle">Interview flow</text>
+  <rect x="373" y="386" width="118" height="36" rx="7" fill="#ffffff" stroke="#c3c8ce" stroke-width="1.2"/>
+  <text x="432" y="409" font-size="13" fill="#1c1f23" text-anchor="middle">Week builder</text>
+  <rect x="500" y="386" width="124" height="36" rx="7" fill="#ffffff" stroke="#c3c8ce" stroke-width="1.2"/>
+  <text x="562" y="402" font-size="13" fill="#1c1f23" text-anchor="middle">Grocery delta</text>
+  <text x="562" y="417" font-size="12" fill="#4b535d" text-anchor="middle">plan minus pantry</text>
+
+  <rect x="246" y="430" width="378" height="82" rx="8" fill="#fdf3e0" stroke="#d29a3a" stroke-width="1.6"/>
+  <text x="254" y="449" font-size="13" font-weight="700" fill="#8a4b08">Allergen table plus hard exclusion filter</text>
+  <text x="254" y="467" font-size="13" fill="#3d3226">Deterministic code inside assistant-core, not the</text>
+  <text x="254" y="484" font-size="13" fill="#3d3226">model. propose_week and swap_meal always run it.</text>
+  <text x="254" y="504" font-size="13" font-weight="700" fill="#8a4b08">The AI suggests, the table blocks.</text>
+
+  <rect x="246" y="520" width="420" height="38" rx="8" fill="#eceff3" stroke="#a9b1bb" stroke-width="1.2"/>
+  <text x="254" y="538" font-size="13.5" font-weight="700" fill="#1c1f23">DataPort interface</text>
+  <text x="658" y="538" font-size="12.5" fill="#4b535d" text-anchor="end">the host implements it</text>
+  <text x="254" y="553" font-size="12.5" fill="#4b535d">Pure TypeScript, no database imports, host independent.</text>
+
+  <rect x="236" y="574" width="440" height="32" rx="8" fill="#ffffff" stroke="#c3c8ce" stroke-width="1.2"/>
+  <text x="456" y="594" font-size="13" fill="#1c1f23" text-anchor="middle">Firestore adapter in apps/demo implements the DataPort</text>
+
+  <rect x="722" y="128" width="214" height="134" rx="10" fill="#e8f0fe" stroke="#7ba7e8" stroke-width="1.4"/>
+  <text x="732" y="152" font-size="14.5" font-weight="700" fill="#1c1f23">Vertex AI</text>
+  <text x="732" y="174" font-size="13" fill="#1c1f23">Gemini 3.7 Flash</text>
+  <text x="732" y="191" font-size="12.5" fill="#4b535d">fallback Gemini 3.6 Flash</text>
+  <text x="732" y="213" font-size="13" fill="#3c4653">Global endpoint</text>
+  <text x="732" y="231" font-size="13" fill="#3c4653">Application Default</text>
+  <text x="732" y="248" font-size="13" fill="#3c4653">Credentials (ADC)</text>
+
+  <rect x="722" y="274" width="214" height="106" rx="10" fill="#ffffff" stroke="#c3c8ce" stroke-width="1.2" stroke-dasharray="6 4"/>
+  <text x="732" y="294" font-size="13" font-weight="700" fill="#1c1f23">Model plug</text>
+  <text x="732" y="314" font-size="13" fill="#4b535d">On Cloud Run: Vertex AI</text>
+  <text x="732" y="331" font-size="13" fill="#4b535d">Locally: AI Studio key</text>
+  <text x="732" y="348" font-size="13" fill="#4b535d">One env flag flips it</text>
+  <text x="732" y="366" font-size="12.5" font-weight="600" fill="#1c1f23">GOOGLE_GENAI_USE_VERTEXAI</text>
+
+  <rect x="722" y="392" width="214" height="198" rx="10" fill="#e8f0fe" stroke="#7ba7e8" stroke-width="1.4"/>
+  <text x="732" y="416" font-size="14.5" font-weight="700" fill="#1c1f23">Firestore</text>
+  <text x="732" y="437" font-size="13" fill="#3c4653">Native mode, us-east1</text>
+  <text x="732" y="462" font-size="13" font-weight="700" fill="#1c1f23">Household memory</text>
+  <text x="740" y="482" font-size="13" fill="#3c4653">pantry</text>
+  <text x="740" y="500" font-size="13" fill="#3c4653">recipes</text>
+  <text x="740" y="518" font-size="13" fill="#3c4653">week plan</text>
+  <text x="740" y="536" font-size="13" fill="#3c4653">preferences</text>
+  <text x="740" y="554" font-size="13" fill="#3c4653">pins with notes</text>
+  <text x="740" y="572" font-size="13" fill="#3c4653">adjustments</text>
+
+  <path d="M107 128 L107 140" fill="none" stroke="#3c4653" stroke-width="1.8" marker-end="url(#ad)"/>
+  <path d="M200 180 L208 180 L208 130 L230 130" fill="none" stroke="#3c4653" stroke-width="1.8" marker-end="url(#ad)"/>
+  <path d="M344 142 L344 148" fill="none" stroke="#3c4653" stroke-width="1.8" marker-end="url(#ad)"/>
+  <path d="M569 142 L569 148" fill="none" stroke="#3c4653" stroke-width="1.8" marker-end="url(#ad)"/>
+  <path d="M424 186 L424 272" fill="none" stroke="#3c4653" stroke-width="1.8" marker-end="url(#ad)"/>
+  <path d="M569 186 L569 190" fill="none" stroke="#3c4653" stroke-width="1.8" marker-end="url(#ad)"/>
+  <path d="M569 248 L569 272" fill="none" stroke="#3c4653" stroke-width="1.8" marker-end="url(#ad)"/>
+  <path d="M645 378 L645 516" fill="none" stroke="#3c4653" stroke-width="1.8" marker-end="url(#ad)"/>
+  <path d="M456 558 L456 570" fill="none" stroke="#3c4653" stroke-width="1.8" marker-end="url(#ad)"/>
+  <path d="M676 590 L702 590 L702 496 L718 496" fill="none" stroke="#3c4653" stroke-width="1.8" marker-end="url(#ad)"/>
+  <path d="M676 218 L698 218 L698 192 L718 192" fill="none" stroke="#6b3fa0" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#av)"/>
+</svg>
