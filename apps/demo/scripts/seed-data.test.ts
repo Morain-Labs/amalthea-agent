@@ -8,8 +8,8 @@ import { household, inventory, priceHints, recipes } from './seed-data';
 
 describe('seed recipes', () => {
   it('ships forty recipes with unique ids', () => {
-    expect(recipes).toHaveLength(40);
-    expect(new Set(recipes.map((recipe) => recipe.id)).size).toBe(40);
+    expect(recipes).toHaveLength(41);
+    expect(new Set(recipes.map((recipe) => recipe.id)).size).toBe(41);
   });
 
   it('declares at least everything the allergen table scans', () => {

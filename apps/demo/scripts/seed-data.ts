@@ -123,6 +123,22 @@ export const recipes: Recipe[] = [
     servings: 4,
   }),
   r({
+    id: 'r-kung-pao',
+    title: 'Kung Pao Chicken',
+    ingredients: [
+      { name: 'chicken thighs', quantity: 1, unit: 'lb' },
+      { name: 'peanuts', quantity: 0.5, unit: 'cup' },
+      { name: 'bell peppers', quantity: 2, unit: 'count' },
+      { name: 'garlic', quantity: 2, unit: 'clove' },
+      { name: 'soy sauce', quantity: 2, unit: 'tbsp' },
+      { name: 'rice', quantity: 2, unit: 'cup' },
+    ],
+    allergens: ['peanut', 'soy', 'gluten'],
+    tags: ['chicken', 'stir-fry', 'spicy'],
+    estimatedCost: 12,
+    servings: 4,
+  }),
+  r({
     id: 'r-sheetpan-chicken',
     title: 'Sheet-Pan Lemon Chicken and Potatoes',
     ingredients: [
